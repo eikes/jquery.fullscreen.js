@@ -1,0 +1,40 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+html {
+  font-family: sans-serif;
+}
+body {
+ text-align: center;
+}
+h1,h2,h3,p {
+  margin-bottom: 0.5em;
+}
+a {
+  text-decoration: none;
+  color: #555;
+}
+.wrapper {
+  width: 620px;
+  padding: 20px 0;
+  margin: auto;
+  text-align: left;
+}
+.image {
+  width: 200px;
+  height: 190px;
+  display: inline-block;
+  vertical-align: top;
+  float: left;
+  margin-right: 5px;
+  background-color: #EEE;
+}
+.caption {
+  font-size: 0.7em;
+  padding: 4px;
+}
+
+ul {
+  margin-left: 2em;
+}

@@ -1,0 +1,189 @@
+<html>
+  <head>
+    <title>jQuery HTML5 Fullscreen Slideshow / Gallery</title>
+    <link href="fullscreenstyle.css" type="text/css" rel="stylesheet"></link>
+    <link href="pagestyle.css" type="text/css" rel="stylesheet"></link>
+    <script src="http://code.jquery.com/jquery.js"></script>
+    <script src="jquery.fullscreenslides.min.js"></script>
+    <script id="sample">
+$(function(){
+  // initialize the slideshow
+  $('img').fullscreenslides();
+  
+  // All events are bound to this container element
+  var $container = $('#fullscreenSlideshowContainer');
+  
+  $container
+    //This is triggered once:
+    .bind("init", function() { 
+
+      // The slideshow does not provide its own UI, so add your own
+      // check the fullscreenstyle.css for corresponding styles
+      $container
+        .append('<div class="ui" id="fs-close">&times;</div>')
+        .append('<div class="ui" id="fs-loader">Loading...</div>')
+        .append('<div class="ui" id="fs-prev">&lt;</div>')
+        .append('<div class="ui" id="fs-next">&gt;</div>')
+        .append('<div class="ui" id="fs-caption"><span></span></div>');
+      
+      // Bind to the ui elements and trigger slideshow events
+      $('#fs-prev').click(function(){
+        // You can trigger the transition to the previous slide
+        $container.trigger("prevSlide");
+      });
+      $('#fs-next').click(function(){
+        // You can trigger the transition to the next slide
+        $container.trigger("nextSlide");
+      });
+      $('#fs-close').click(function(){
+        // You can close the slide show like this:
+        $container.trigger("close");
+      });
+      
+    })
+    // When a slide starts to load this is called
+    .bind("startLoading", function() { 
+      // show spinner
+      $('#fs-loader').show();
+    })
+    // When a slide stops to load this is called:
+    .bind("stopLoading", function() { 
+      // hide spinner
+      $('#fs-loader').hide();
+    })
+    // When a slide is shown this is called.
+    // The "loading" events are triggered only once per slide.
+    // The "start" and "end" events are called every time.
+    // Notice the "slide" argument:
+    .bind("startOfSlide", function(event, slide) { 
+      // set and show caption
+      $('#fs-caption span').text(slide.title);
+      $('#fs-caption').show();
+    })
+    // before a slide is hidden this is called:
+    .bind("endOfSlide", function(event, slide) { 
+      $('#fs-caption').hide();
+    });
+});
+    </script>
+  </head>
+  <body>
+    
+    <div class="wrapper">
+      
+      <h1>jQuery HTML5 Fullscreen Slideshow</h1>
+      
+      <p>This jQuery plugin lets you create fullscreen galleries where the slides are shown on the entire screen using the fullscreen APIs provided by Firefox 10+ and Chrome 15+ (and possibly Safari 5.1+).</p>
+      <p>In all other browsers it falls back to displaying the slideshow in the entire viewport.</p>
+      
+      <h2>Example (click image to view)</h2>
+      
+      <div class="image">
+        <a rel="gallery" title="Broadway Tower in Cotswolds, England" href="http://upload.wikimedia.org/wikipedia/commons/c/cb/Broadway_tower_edit.jpg">
+          <img src="http://upload.wikimedia.org/wikipedia/commons/thumb/c/cb/Broadway_tower_edit.jpg/200px-Broadway_tower_edit.jpg">
+        </a>
+        <div class="caption">
+          <a href="http://en.wikipedia.org/wiki/Broadway_Tower">
+            Broadway Tower in Cotswolds, England
+          </a>
+          <br>
+          Taken by Wikimedian 
+          <a href="http://en.wikipedia.org/wiki/User:Newton2">
+            Newton2
+          </a>
+        </div>
+      </div>
+      
+      <div class="image">
+        <a rel="gallery" title="New York City at Night, HDR" href="http://upload.wikimedia.org/wikipedia/commons/thumb/2/22/New_York_City_at_night_HDR.jpg/1280px-New_York_City_at_night_HDR.jpg">
+          <img src="http://upload.wikimedia.org/wikipedia/commons/thumb/2/22/New_York_City_at_night_HDR.jpg/200px-New_York_City_at_night_HDR.jpg">
+        </a>
+        <div class="caption">
+          <a href="http://en.wikipedia.org/wiki/New_York">
+            New York City at Night, HDR
+          </a>
+          <br>
+          Taken by 
+          <a href="http://www.flickr.com/people/paulobar/">
+            Paulo Barcellos Jr.
+          </a>
+        </div>
+      </div>
+      
+      <div class="image">
+        <a rel="gallery" title="Red Squirrel with pronounced winter ear tufts" href="http://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Eichh%C3%B6rnchen_D%C3%BCsseldorf_Hofgarten_edit.jpg/1280px-Eichh%C3%B6rnchen_D%C3%BCsseldorf_Hofgarten_edit.jpg">
+          <img src="http://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Eichh%C3%B6rnchen_D%C3%BCsseldorf_Hofgarten_edit.jpg/200px-Eichh%C3%B6rnchen_D%C3%BCsseldorf_Hofgarten_edit.jpg">
+        </a>
+        <div class="caption">
+          <a href="http://en.wikipedia.org/wiki/Red_Squirrel">
+            Red Squirrel with pronounced winter ear tufts
+          </a>
+          <br>
+          Taken by Wikimedian 
+          <a href="http://commons.wikimedia.org/wiki/User:Ray_eye">
+            Ray eye
+          </a>
+        </div>
+      </div>
+      
+      <p>Pictures take from <a href="http://commons.wikimedia.org/wiki/Commons:Picture_of_the_Year/2007">Wikimedia Commons Picture of the Year 2007</a>.</p>
+      
+      <h2>Usage</h2>
+      
+      <pre id="code" class="prettyprint"></pre>
+      
+      <h2>License</h2>
+      
+      <p>&copy; Copyright 2012 by <a href="http://eike.se/nd">Eike Send</a></p>
+      <p>The code is licensed under the <a href="MIT-LICENSE.txt">MIT</a> and the <a href="GPL-LICENSE.txt">GPLv2</a> Licenses, just like jQuery.</p>
+      
+      <h2>Footnotes</h2>
+      
+      <p>Learn more about the fullscreen API:</p>
+      
+      <ul>
+        <li>
+          <a href="http://dvcs.w3.org/hg/fullscreen/raw-file/tip/Overview.html">
+            WhatWG API draft
+          </a>
+        </li>
+        <li>
+          <a href="http://caniuse.com/#search=fullscreen">
+            "Can I use" compatibility table
+          </a>
+        </li>
+        <li>
+          <a href="https://developer.mozilla.org/en/DOM/Using_full-screen_mode">
+            Mozilla Developer Network documentation
+          </a>
+        </li>
+      </ul>
+      
+    </div>
+    
+    <!-- This is unrelated to the slideshow, it only creates the Usage section and other stuff: -->
+    
+    <link href="http://google-code-prettify.googlecode.com/svn/trunk/src/prettify.css" type="text/css" rel="stylesheet"></link>
+    <script src="http://google-code-prettify.googlecode.com/svn/trunk/src/prettify.js"></script>
+    <script>
+      $(function() {
+        $('#code').text($('#sample').html());
+        prettyPrint();
+      });
+    </script>
+    <a href="http://github.com/eikes/jquery.fullscreen.js"><img style="position: absolute; top: 0; right: 0; border: 0;" src="http://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"></a>
+    <script type="text/javascript">
+      
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-8283689-4']);
+      _gaq.push(['_trackPageview']);
+      
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+      
+    </script>
+  </body>
+</html>
