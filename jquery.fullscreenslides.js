@@ -77,7 +77,7 @@
   var attachEvents = function(){
     
     // deal with resizing the browser window and resize container
-    $container.bind("updateSize", function(event) {
+    $container.bind("updateSize orientationchange", function(event) {
       $container.height($(window).height());
       updateSlideSize();
     });
@@ -186,7 +186,7 @@
     }
     
     // Close the viewer
-    $container.bind("close", function(){
+    $container.bind("close", function (){
       var options = $container.data("options");
       var oldSlide = $container.data("currentSlide");
       oldSlide.$img.hide();
@@ -208,9 +208,12 @@
         document.removeEventListener('fullscreenchange', changeFullScreenHandler);
         document.removeEventListener('mozfullscreenchange', changeFullScreenHandler);
         document.removeEventListener('webkitfullscreenchange', changeFullScreenHandler);
+      } else {
+        $container.data("hiddenElements").show();
+        $(window).scrollTop($container.data("originalScrollTop"));
       }
       $container
-        .removeData("currentSlide slides width height")
+        .removeData("currentSlide slides width height originalScrollTop hiddenElements")
         .hide();
     });
     
@@ -255,6 +258,10 @@
         $container.trigger("init");
         firstrun = false;
       }
+      if (!options.useFullScreen && !$container.data("originalScrollTop")) {
+        $container.data("originalScrollTop", $(window).scrollTop());
+        $container.data("hiddenElements", $('body > *').filter(function(){return $(this).css("display")!="none";}).hide());
+      }
       $container.show();
       $container.trigger("showSlide", slide);
     });
@@ -282,9 +289,8 @@
     $container.data("options", options);
     // Apply default styles
     $container.css({
-      "position"         : "fixed",
-      "top"              : 0,
-      "left"             : 0,
+      "position"         : "absolute",
+      "top"              : "0px",
       "width"            : "100%",
       "text-align"       : "center",
       "background-color" : options.bgColor
