@@ -15,6 +15,9 @@ a {
   text-decoration: none;
   color: #555;
 }
+a img {
+  border: none;
+}
 .wrapper {
   width: 620px;
   padding: 20px 0;
