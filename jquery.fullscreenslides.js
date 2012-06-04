@@ -139,6 +139,13 @@
               updateSlideSize(newSlide);
               changeSlide(oldSlide, newSlide);
             })
+            .error(function(){
+              isLoading = false;
+              newSlide.error = true;
+              $container
+                .trigger("stopLoading")
+                .trigger("error", newSlide);
+            })
             .attr("src", newSlide.image);
           $container.append(newSlide.$img);
         } else {
@@ -148,16 +155,16 @@
     });
     
     $container.bind("prevSlide nextSlide", function(event) {
-      var slides = $container.data("slides");
-      var currentID = $container.data("currentSlide").id;
-      var nextID;
+      var nextID,
+          slides = $container.data("slides"),
+          currentSlide = $container.data("currentSlide"),
+          currentID = currentSlide && currentSlide.id || 0;
       if (event.type == "nextSlide") {
         nextID = (currentID + 1) % slides.length;
       } else {
         nextID = (currentID - 1 + slides.length) % slides.length;
       }
-      var nextSlide = slides[nextID];
-      $container.trigger("showSlide", nextSlide);
+      $container.trigger("showSlide", slides[nextID]);
     });
     
     // privat function to change between slides
@@ -166,9 +173,13 @@
         $container.trigger("endOfSlide", oldSlide);
         oldSlide.$img.fadeOut();
       }
-      newSlide.$img.fadeIn(function(){
+      if (!newSlide.error) {
+        newSlide.$img.fadeIn(function(){
+          $container.trigger("startOfSlide", newSlide);
+        });
+      } else {
         $container.trigger("startOfSlide", newSlide);
-      });
+      }
       $container.data("currentSlide", newSlide);
     }
     
@@ -189,7 +200,7 @@
     $container.bind("close", function (){
       var options = $container.data("options");
       var oldSlide = $container.data("currentSlide");
-      oldSlide.$img.hide();
+      oldSlide && oldSlide.$img && oldSlide.$img.hide();
       $container.trigger("endOfSlide", oldSlide);
       $(document).unbind("keydown", keyFunc);
       // Use the fancy new FullScreenAPI:
