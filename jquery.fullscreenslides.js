@@ -87,7 +87,7 @@
       if (slide === undefined) {
         var slide = $container.data("currentSlide");
       }
-      if (slide !== undefined) {
+      if (slide && slide.$img) {
         var wh = $(window).height();
         var ww = $(window).width();
         // compare the window aspect ratio to the image aspect ratio
@@ -173,7 +173,7 @@
         $container.trigger("endOfSlide", oldSlide);
         oldSlide.$img.fadeOut();
       }
-      if (!newSlide.error) {
+      if (newSlide.$img && !newSlide.error) {
         newSlide.$img.fadeIn(function(){
           $container.trigger("startOfSlide", newSlide);
         });
