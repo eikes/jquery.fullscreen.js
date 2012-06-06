@@ -269,9 +269,11 @@
         $container.trigger("init");
         firstrun = false;
       }
-      if (!options.useFullScreen && !$container.data("originalScrollTop")) {
-        $container.data("originalScrollTop", $(window).scrollTop());
+      if (!options.useFullScreen) {
         $container.data("hiddenElements", $('body > *').filter(function(){return $(this).css("display")!="none";}).hide());
+      }
+      if (!$container.data("originalScrollTop")) {
+        $container.data("originalScrollTop", $(window).scrollTop());
       }
       $container.show();
       $container.trigger("showSlide", slide);
@@ -314,7 +316,7 @@
       var slide = {
         image: link.href,
         title: link.title,
-        rel: link.rel
+        rel: link.rel || "__all__"
       };
       slide.data = $.extend({}, $(this).data(), $(link).data());
       slideshows[slide.rel] = slideshows[slide.rel] || [];
