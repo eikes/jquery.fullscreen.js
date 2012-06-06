@@ -317,10 +317,11 @@
     // Store galleries
     this.each(function(){
       var link = $(this).parents("a")[0];
+      if (!link.rel) link.setAttribute("rel", "__all__");
       var slide = {
         image: link.href,
         title: link.title,
-        rel: link.rel || "__all__"
+        rel: link.rel
       };
       slide.data = $.extend({}, $(this).data(), $(link).data());
       slideshows[slide.rel] = slideshows[slide.rel] || [];
