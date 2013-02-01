@@ -9,16 +9,15 @@
 ;
 /* 
  * It assumes that your images are wrapped in links like this:
+ *      
+ * <a href="image-1-large.jpg" class="gallery" rel="gallery-1" title="woot">
+ * </a>
+ * <a href="image-2-large.jpg" class="gallery" rel="gallery-1" title="woot">
+ * </a>
+ * <a href="image-3-large.jpg" class="gallery" rel="gallery-1" title="woot">
+ * </a>
  * 
- * <a href="image-1-large.jpg" rel="gallery-1" title="woot">
- *   <img src="image-1-small"/>
- * </a>
- * <a href="image-2-large.jpg" rel="gallery-1" title="woot">
- *   <img src="image-2-small"/>
- * </a>
- * <a href="image-3-large.jpg" rel="gallery-1" title="woot">
- *   <img src="image-3-small"/>
- * </a>
+ * You are free to place any images or text inside the links or hide them when you only want one start button
  * 
  * You would then call it like this:
  * 
@@ -26,8 +25,20 @@
  * <script src="fullscreenslides.js"></script>
  * <script>
  *  $(function(){
- *    $("img").fullscreenslides();
+ *    $("a.gallery").fullscreenslides();
  *    
+ *    // start the slideshow with the particular picture
+ *    $('a.gallery').click(function(){
+ *      $container.trigger("show",$(this).data("slide"));
+ *      return false;
+ *    });
+ * 
+ *    // start slideshow with a click on any html element
+ *    $('.startbutton').click(function(){
+ *        $container.trigger("start",["gallery-1",slideNo]);
+ *        return false;
+ *    });
+ *
  *    // You can then use the container:
  *    var $container = $('#fullscreenSlideshowContainer');
  *    
@@ -97,11 +108,15 @@
         // compare the window aspect ratio to the image aspect ratio
         // to use either maximum width or height
         if ((ww / wh) > (slide.$img.width() / slide.$img.height())) {
+          // do not resize unless told to
+          wh = (wh > slide.$img.height() && $container.data("options").noEnlarge) ? slide.$img.height() : wh;
           slide.$img.css({
             "height" : wh + "px",
             "width"  : "auto"
           });
         } else {
+          // do not resize unless told to
+          ww = (ww > slide.$img.width()  && $container.data("options").noEnlarge) ? slide.$img.width() : ww;
           slide.$img.css({
             "height" : "auto",
             "width"  : ww + "px"
@@ -119,16 +134,12 @@
       //todo: throttle
       $container.trigger("updateSize");
     });
-    
-    // Show individual slides
-    var isLoading = false;
-    $container.bind("showSlide", function(event, newSlide) {
-      if (!isLoading) {
-        var oldSlide = $container.data("currentSlide");
+
+    // Load a slide
+    $container.bind("loadSlide", function(event, newSlide) {
         // if it is not loaded yet then initialize the dom object and load it
         if (!("$img" in newSlide)) {
-          isLoading = true;
-          $container.trigger("startLoading");
+          $(newSlide).data("loading",true);
           newSlide.$img = $('<img class="slide">')
             .css({
               "position"    : "absolute",
@@ -138,13 +149,20 @@
             .hide()
             // on load get the images dimensions and show it
             .load(function(){
-              isLoading = false;
-              $container.trigger("stopLoading");
+              $(newSlide).data("loading",false);
               updateSlideSize(newSlide);
-              changeSlide(oldSlide, newSlide);
+              // loading the currently requested slide - otherwise it was a preload
+              if ($(newSlide).data("requestShow")) {
+                $(newSlide).data("requestShow",false);
+                $container.trigger("stopLoading");
+                changeSlide($container.data("currentSlide"), newSlide);
+                console.log("postloaded");
+              } else {
+                console.log("preloaded");
+              }
             })
             .error(function(){
-              isLoading = false;
+              $(newSlide).data("loading",false);
               newSlide.error = true;
               $container
                 .trigger("stopLoading")
@@ -152,23 +170,52 @@
             })
             .attr("src", newSlide.image);
           $container.append(newSlide.$img);
+        }
+    });
+    
+    
+    // Show individual slides
+    var isLoading = false;
+    $container.bind("showSlide", function(event, newSlide) {
+      // check if preload has finished
+      if (!$(newSlide).data("loading")) {
+        var oldSlide = $container.data("currentSlide");
+        // if it is not loaded yet then initialize the dom object and load it, only to avoid raceconditions with the preloader
+        if (!("$img" in newSlide)) {
+          $container.trigger("startLoading");
+          $(newSlide).data("requestShow",true);
+          $container.trigger("loadSlide",newSlide);
         } else {
           changeSlide(oldSlide, newSlide);
         }
+      } else {
+        $(newSlide).data("requestShow",true);
       }
     });
     
-    $container.bind("prevSlide nextSlide", function(event) {
+    $container.bind("prevSlide nextSlide", function(event, preLoad) {
       var nextID,
           slides = $container.data("slides"),
           currentSlide = $container.data("currentSlide"),
-          currentID = currentSlide && currentSlide.id || 0;
+          currentID = currentSlide && currentSlide.id || 0,
+          options = $container.data("options");
+      // sanitary check for race condition which can occour if slideshow is timer triggered in the user app
+      if (!slides) return;
       if (event.type == "nextSlide") {
         nextID = (currentID + 1) % slides.length;
+        // no loop
+        if ((nextID < currentID) && options.noLoop) {
+            $container.trigger("close");
+            return;
+        }
       } else {
         nextID = (currentID - 1 + slides.length) % slides.length;
       }
-      $container.trigger("showSlide", slides[nextID]);
+      // check if the next slide should be shown or just preloaded
+      if (preLoad)
+          $container.trigger("loadSlide", slides[nextID]);
+      else
+          $container.trigger("showSlide", slides[nextID]);
     });
     
     // privat function to change between slides
@@ -185,7 +232,15 @@
         $container.trigger("startOfSlide", newSlide);
       }
       $container.data("currentSlide", newSlide);
+      $container.trigger("nextSlide", true);
     }
+    
+    // Start Slideshow
+    $container.bind("start", function(event, rel, slideNo) {
+        var slideshow = $container.data("slideshows")[rel];
+        var slide = slideshow[slideNo] ;
+        $container.trigger("show", slide);
+    })
     
     // keyboard navigation
     var keyFunc = function(event) {
@@ -232,6 +287,13 @@
         .hide();
     });
     
+    // Set options at runtime. This is usefull when you want to set options on user request -> after init, but before start
+    $container.bind("setOptions", function (event, options){
+      var o = $container.data("options");
+      o = $.extend(o,options|| {});
+      $container.data("options", o);
+    });
+    
     // When ESC is pressed in full screen mode, the keypressed event is not
     // triggered, so this here catches the exit-fullscreen event:
     function changeFullScreenHandler(event) {
@@ -243,7 +305,8 @@
     
     var firstrun = true;
     // Show a particular slide
-    $container.bind("show", function(event, rel, slide){
+    $container.bind("show", function(event, slide){
+      var rel = slide.rel;
       var options = $container.data("options");
       var slideshows = $container.data("slideshows");
       var slides = slideshows[rel];
@@ -296,7 +359,8 @@
     var options = $.extend({
       "bgColor"           : "#000",
       "useFullScreen"     : true,
-      "startSlide"        : 0
+      "noEnlarge"         : true,
+      "noLoop"            : false,
     }, options || {});
     // Check if fullScreenApi is available
     options.useFullScreen = options.useFullScreen && !!(
@@ -316,22 +380,16 @@
     var slideshows = {};
     // Store galleries
     this.each(function(){
-      var link = $(this).parents("a")[0];
-      if (!link.rel) link.setAttribute("rel", "__all__");
+      if (!this.rel) this.setAttribute("rel", "__all__");
       var slide = {
-        image: link.href,
-        title: link.title,
-        rel: link.rel
+        image: this.href,
+        title: this.title,
+        rel: this.rel
       };
-      slide.data = $.extend({}, $(this).data(), $(link).data());
       slideshows[slide.rel] = slideshows[slide.rel] || [];
       slideshows[slide.rel].push(slide);
       slide.id = slideshows[slide.rel].length - 1;
-      $(link).data("slide", slide);
-      $(link).click(function(event){
-        $container.trigger("show", [this.rel, $(this).data("slide")]);
-        event.preventDefault();
-      });
+      $(this).data("slide", slide);
     });
     $container.data("slideshows", slideshows);
   }
