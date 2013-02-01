@@ -10,11 +10,14 @@
 /* 
  * It assumes that your images are wrapped in links like this:
  *      
- * <a href="image-1-large.jpg" class="gallery" rel="gallery-1" title="woot">
+ * <a href="image-1-large.jpg" class="gallery" rel="gallery-1" title="woot"> 
+ *    image or text
  * </a>
  * <a href="image-2-large.jpg" class="gallery" rel="gallery-1" title="woot">
+ *    image or text
  * </a>
  * <a href="image-3-large.jpg" class="gallery" rel="gallery-1" title="woot">
+ *    image or text
  * </a>
  * 
  * You are free to place any images or text inside the links or hide them when you only want one start button
