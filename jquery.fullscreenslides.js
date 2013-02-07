@@ -180,7 +180,7 @@
       // check if preload has finished
       if (!$(newSlide).data("loading")) {
         var oldSlide = $container.data("currentSlide");
-        // if it is not loaded yet then initialize the dom object and load it, only to avoid raceconditions with the preloader
+        // if it is not loaded yet then initialize the dom object and load it, only to avoid race conditions with the preloader
         if (!("$img" in newSlide)) {
           $container.trigger("startLoading");
           $(newSlide).data("requestShow",true);
@@ -200,13 +200,13 @@
           currentID = currentSlide && currentSlide.id || 0,
           options = $container.data("options");
       // sanitary check for race condition which can occour if slideshow is timer triggered in the user app
-      if (!slides) return;
+      if (!slides) return false;
       if (event.type == "nextSlide") {
         nextID = (currentID + 1) % slides.length;
-        // no loop
+        // no repeat
         if ((nextID < currentID) && options.noLoop && !preLoad) {
-            $container.trigger("close");
-            return;
+            $(this).trigger("close");
+            return false;
         }
       } else {
         nextID = (currentID - 1 + slides.length) % slides.length;
@@ -285,6 +285,7 @@
       $container
         .removeData("currentSlide slides width height originalScrollTop hiddenElements")
         .hide();
+      return false;
     });
     
     // Set options at runtime. This is usefull when you want to set options on user request -> after init, but before start
