@@ -159,10 +159,7 @@
                 $(newSlide).data("requestShow",false);
                 $container.trigger("stopLoading");
                 changeSlide($container.data("currentSlide"), newSlide);
-                console.log("postloaded");
-              } else {
-                console.log("preloaded");
-              }
+              } 
             })
             .error(function(){
               $(newSlide).data("loading",false);
@@ -207,7 +204,7 @@
       if (event.type == "nextSlide") {
         nextID = (currentID + 1) % slides.length;
         // no loop
-        if ((nextID < currentID) && options.noLoop) {
+        if ((nextID < currentID) && options.noLoop && !preLoad) {
             $container.trigger("close");
             return;
         }
@@ -270,7 +267,7 @@
         if (document.cancelFullScreen) {  
           document.cancelFullScreen();  
         } 
-        if (document.mozCancelFullScreen) {
+        if (document.mozFullScreen) {
           $("html").css("overflow", "auto");
           $(document).scrollTop($container.data("mozScrollTop"));
           document.mozCancelFullScreen();
