@@ -9,10 +9,22 @@
     <script id="sample">
 $(function(){
   // initialize the slideshow
-  $('.image img').fullscreenslides();
-  
+  $('.image a[rel="gallery"]').fullscreenslides();
   // All events are bound to this container element
   var $container = $('#fullscreenSlideshowContainer');
+     
+  // start slideshow with a click on one of the pictures
+  $('.image a[rel = "gallery"]').click(function(){
+      $container.trigger("show",$(this).data("slide"));
+      return false;
+  });
+
+  // start 'gallery' slideshow starting with slide #0  
+  $('#startButton').click(function(){
+      $container.trigger("start",["gallery",0]);
+      return false;
+  });
+  
   
   $container
     //This is triggered once:
@@ -64,7 +76,7 @@ $(function(){
     // before a slide is hidden this is called:
     .bind("endOfSlide", function(event, slide) { 
       $('#fs-caption').hide();
-    });
+    });   
 });
     </script>
   </head>
@@ -126,6 +138,10 @@ $(function(){
           </a>
         </div>
       </div>
+      
+      <h2>Example (click on separate start button)</h2>
+      
+      <p><button href="#" id="startButton" title="Start">Start</button></p>
       
       <p>Pictures take from <a href="http://commons.wikimedia.org/wiki/Commons:Picture_of_the_Year/2007">Wikimedia Commons Picture of the Year 2007</a>.</p>
       
