@@ -306,7 +306,7 @@
     $container.data("options", options);
     // Apply default styles
     $container.css({
-      "position"         : "absolute",
+      "position"         : "fixed",
       "top"              : "0px",
       "left"             : "0px",
       "width"            : "100%",
