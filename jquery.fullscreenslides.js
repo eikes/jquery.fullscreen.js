@@ -252,7 +252,7 @@
       $(document).bind("keydown", keyFunc);
       // Use the fancy new FullScreenAPI:
       if (options.useFullScreen) {
-        con = $container[0];
+        var con = $container[0];
         if (con.requestFullScreen) {
           con.requestFullScreen();
           document.addEventListener('fullscreenchange', changeFullScreenHandler);
